@@ -1,3 +1,19 @@
 This is my graduation project(GP) of undergraduate.The Task is Research and 
 Implementation of SSL protocol based on OpenSSL(基于OpenSSL的SSL协议研究与
 实现).
+
+GP-
+  |-------src    --> the src code 
+  |
+  |
+  |
+  |             |---translation  -->the translation of documents
+  |             |
+  |-------doc---|---reference    -->the reference documents
+  |             |
+  |             |---presentation -->the documents I write for presentation
+  |
+  |
+  |
+  |-------README  --> README
+                
