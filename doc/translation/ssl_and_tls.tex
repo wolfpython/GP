@@ -150,11 +150,93 @@ SSL的第一个发布版本是SSLv2,由Netscape发布。但是他有一些缺陷
  
 \item{{\bf{MAC}}比较弱，依赖于{\bf{MD5}}}
 
-\item{验证和加密使用相同的密钥。使得MAC输出密码非常弱}
-
-
-
+\item{验证和加密使用相同的密钥。使得出口密码MAC非常弱}
+ 
+\item{使用TCP关闭数据链接，这意味着如果伪造TCP FIN\footnote{原文为SYN}报文，可以导致截断攻击。}
+ \item{在攻击中，无法手动对握手进行保护}
 \end{itemize}
+
+这写问题被SSLv3解决，SSLv3也是由Netscape发布的。随后被{\bf{IETF}}采用，并
+标准化为TLSv1。SSLv2和TLSv1主要的区别在于：
+
+\begin{itemize}
+        \item{从主密钥提高密钥扩展，主密钥在握手期间通过数据交换计算得到。}
+        \item{SSLv3基于{\bf{HMAC}}早期修改版。TLSv1使用{\bf{HMAC}}。}
+        \item{实现必须支持{\bf{DH/DSS}}密钥交换和{\bf{3DES}}。}
+\end{itemize}
+
+\section{记录层}
+
+记录层封装了即将传送到底层协议(通常是TCP/IP)的报文。每个记录可以包含$2^{14}$字节
+的数据，为了满足这个大小限制可以对报文进行分片。一个记录也可以包含多条报文，
+只要它们是同意类型。这通常发生在握手阶段，为了把多条报文放在同一个数据包里
+传输，提高握手速度，一条记录通常包含多个报文。\\
+
+\setlength{\unitlength}{1cm}
+\begin{picture}(14,3)
+        \put(0,0){\line(0,1){2}}
+        \put(0,0){\line(1,0){12}}
+        \put(0,2){\line(1,0){12}}
+        \put(12,0){\line(0,1){2}}
+        \put(2,0){\line(0,1){2}}
+        \put(7,0){\line(0,1){2}}
+        \put(0.2,1){\texttt{内容类型}}
+        \put(4,1){\texttt{版本}}
+        \put(9,1){\texttt{长度}}
+        \put(5,-0.5){记录头}
+\end{picture}
+\\
+
+
+\vspace{1cm}
+记录从记录头开始，包含了协议版本号，数据长度（以字节为单位）和报文类型，包括
+change cipher spec,警告(alert),握手（handshake)和应用程序数据(application
+data)。\\
+
+紧接着记录头的是报文数据。数据是用商定的压缩算法压缩过的。然后，由于TSL和SSL中，并没有明确规定使用何种压缩算法，通常这个操作被省略。\\
+
+然后对压缩的数据计算{\bf{MAC}}，并附加到记录之后。{\bf{MAC}}的计算方法在下
+一部分涉及。\\
+
+
+\begin{picture}(14,3)
+        \put(0,0){\line(0,1){2}}
+        \put(0,0){\line(1,0){12}}
+        \put(0,2){\line(1,0){12}}
+        \put(12,0){\line(0,1){2}}
+        \put(9,0){\line(0,1){2}}
+        \put(4,1){填充字节}
+        \put(10,1){填充长度}
+        \put(5,-0.5){记录填充}
+\end{picture}
+\\
+
+如果块密码对于连接生效，那么就会填充报文，使得报文大小是密码块大小的倍数。填充
+字段包含填充数据和一个字节的填充长度。填充长度（一个字节）所在字段也被包含在
+填充长度里。填充长度最大可以达到255字节，只要保证最终记录长度是密码块长度的倍数。\\
+
+举个例子，
+
+
+
+
+
+
+%\begin{center}
+%\begin{table}[h!b!p!]
+%        \caption{记录头}
+%\begin{tabular}{|p{2cm}|p{5cm}|p{5cm}|}
+%
+%\hline 
+%内容类型 & 版本 & 长度\\
+%
+%\hline
+%\end{tabular}
+%\end{table}
+%
+%\end{center}
+
+
 
 
 %\section{Socket API}
