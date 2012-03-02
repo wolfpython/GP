@@ -6,6 +6,7 @@
 \usepackage{color}
 \usepackage[BoldFont,SlantFont,CJKchecksingle]{xeCJK}
 %载入粗体，斜体，禁止单个汉字一行
+\usepackage{amsmath}
 
 %\setCJKmainfont{AR PL KaitiM GB}
 \setCJKmainfont{AR PL SungtiL GB} %缺省汉字字体为简体
@@ -20,6 +21,7 @@
 %rename abstract to 摘要
 \renewcommand{\abstractname}{摘要}
 \renewcommand{\contentsname}{目录}
+\renewcommand{\appendixname}{附录}
 
 %some common defination used frequently
 \newcommand{\bfs}[1]{{\bf{#1}}}
@@ -33,7 +35,7 @@
 \texttt{horms@verge.net.au}\\
 \texttt{horms@debian.org}}
 
-\date{\today}
+\date{}
 %
 \begin{document}
 \maketitle
@@ -725,6 +727,404 @@ pad1))$$
 
 \subsubsection{完成}
 
+在改变密码说明报文之后，服务器和客户端都会发送完成报文。用来确认握手没有被
+外界干预。一旦接受到了，就在本地重新计算，如果接受到的和本地值不相同，则
+说明握手有外界干预。第一个报文携带被加密的商定密码族和密钥。\\
+
+\begin{figure}
+        \begin{picture}(12,3)
+                \put(0,0){\line(1,0){12}}
+                \put(0,0){\line(0,1){2}}
+                \put(0,2){\line(1,0){12}}
+                \put(12,0){\line(0,1){2}}
+                \put(0,1){\line(1,0){6}}
+                \put(6,1){\line(0,1){1}}
+
+                \put(2,1.5){握手}
+                \put(5,0.5){确认数据}
+                \put(5,-0.5){TLSv1完成报文}
+
+        \end{picture}
+\end{figure}
+
+
+对于\bfs{TLSv1}，确认数据由\bfs{PRF}产生，有12字节。我们将在密钥材料产生部分
+详细谈到\bfs{PRF}。\\
+
+PRF使用主密语作为密语，文本是标签的连接---对于服务器是\bfs{server},对于
+客户端是\bfs{client}。如果发生了重商谈，这个包含了在之前握手时的每一个握手
+报文。\\
+
+\begin{figure}
+        \begin{picture}(12,6)
+                \put(0,0){\line(0,1){5}}
+                \put(0,0){\line(1,0){12}}
+                \put(0,5){\line(1,0){12}}
+                \put(12,0){\line(0,1){5}}
+                \put(0,4){\line(1,0){6}}
+                \put(6,4){\line(0,1){1}}
+                \put(0,2){\line(1,0){6}}
+                \put(6,2){\line(0,1){1}}
+                \put(6,3){\line(1,0){6}}
+
+                \put(5,1){sha1散列}
+                \put(5,3){md5 散列}
+                \put(2,4.5){握手}
+
+        \end{picture}
+\end{figure}
+
+对于\bfs{SSLv3}，使用类似\bfs{HMAC}的嵌套散列。它也使用主密语，握手报文和
+发送端和客户端标识符。一个独立的类似HMAC的散列使用\bfs{MD5}和{SHA1}生成。
+然后连接他们作为验证数据。客户端的标识是0x434C4E54,服务器是0x53535652。\\
+
+\bfs{SSLv3}和\bfs{TLSv1}使用标识的原因是使得客户端和服务器的完成保温不相同，
+防止攻击者发送一个相同的报文到发送端。\\
+
+\subsection{改变密码说明}
+
+\begin{picture}(12,2)
+        \put(4,0){\line(0,1){1}}
+        \put(4,0){\line(1,0){3}}
+        \put(7,0){\line(0,1){1}}
+        \put(4,1){\line(1,0){3}}
+
+        \put(4.1,0.5){改变密码说明}
+        \put(4.1,-0.5){改变密码说明}
+
+\end{picture}
+
+改变密码说明报文用来通知连接对端，商定的连接参数在这个报文发送之后立即生效。
+换句话说，它使得密码族生效。在握手结束后，任何应用程序数据发送之前发送此
+报文。它仅仅影响连接的方向，因此，只可以是连接的对端发送。
+
+
+\subsection{警告}
+
+\begin{picture}(12,2)
+        \put(3,0){\line(0,1){1}}
+        \put(3,0){\line(1,0){6}}
+        \put(9,0){\line(0,1){1}}
+        \put(3,1){\line(1,0){6}}
+        \put(6,0){\line(0,1){1}}
+
+        \put(4.1,0.5){级别}
+        \put(5.1,-0.5){警告报文}
+\put(7.1,0.5){描述} 
+\end{picture}
+
+在连接关闭之前或者有错误发生，连接的任一端都可以发送警告报文。警告由级别---
+警告或者严重，和描述构成。这两种值都是8比特。描述要么是通知结束或者某些错误状态
+的描述，比如不是预期的报文，或者记录mac损毁。所有的错误藐视在附录A中。\\
+
+\subsection{应用程序数据}
+
+应用程序数据报文用来在连接的两个端点之间传输数据。它不包含头部，仅仅由数据本身构成，数据封装在记录里。\\
+
+\section{密钥材料生成}
+
+密钥材料生成用来产生密钥材料,作为密钥和输入向量加密验证记录。密钥生成的输入
+客户端和服务器的随即数，和pre-master密语（在客户端和服务器的hello报文里）和
+客户端密钥交换报文。pre-master密语是发送到服务器的，且是经过自己证书加密的，
+所以应该只有客户端和服务器知道。
+
+\subsection{TLSv1}
+
+\subsubsection{伪随机函数(PRF)}
+
+在TLS中，伪随机函数（\bfs{PRF})是密钥材料生成的核心。它也用在完成握手报文里
+。\bfs{PRF}以一个扩展函数开始，扩展函数接受一个密钥和一些文本，产生任意的输出。
+它定义如下：
+
+%\begin{displaymath}
+%        \begin{align}
+
+%\begin{gather}
+\begin{eqnarray}
+        P\_H(secret, text) =& HMAC\_H(K,A(1),T)\oplus {} \nonumber\\
+                           &HMAC\_H(K,A(2),T)\oplus  \nonumber \\
+                           &HMAC\_H(K,A(3),T)\oplus \cdots \nonumber
+\end{eqnarray}
+
+\begin{center}
+\begin{minipage}[t]{0.4\textwidth}
+        其中:
+\begin{align*}
+        \oplus:\qquad &\text{连接}\\
+            A():\qquad &A(0) = text {} \\
+                 \qquad& A(n) = HMAC\_H(secret,A(n-1)) {} \\
+              H: \qquad &\text{散列函数,SHA1或者MD5} {}\\
+              K: \qquad &\text{密钥} {}\\
+              T: \qquad &\text{文本} {}
+\end{align*}
+\end{minipage}
+\end{center}
+
+这个公式要运行多次。要产生48字节的输出，对于\bfs{MD5}要运行3次，对于\bfs{SHA1}要运行3次，并且最后12个字节要丢弃。\\
+
+\bfs{PRF}由运行\bfs{MD5}的\bfs{PRF}和运行\bfs{SHA1}的\bfs{PRF}异或得到：
+
+\begin{eqnarray}
+        PRF(secret,text) =  P\_MD5(S1,text) \otimes P\_SHA1(S2,text) \nonumber
+\end{eqnarray}
+
+\begin{center}
+        \begin{minipage}[t]{0.4\textwidth}
+               其中:
+               \begin{align*}
+                       \otimes:\qquad &\text{异或} \\
+                            S1:\qquad &\text{密语的前半部份（按位}）\\
+                            S2:\qquad &\text{密语的后半部分(按位)}
+               \end{align*}
+
+       \end{minipage}
+\end{center}
+
+\subsubsection{主密语}
+
+客户端和服务器独立的使用\bfs{PRF},是为了计算48字节的主密语。随后被转换成密钥
+块（分组）。密钥块尽可能的长，并且被分解为\bfs{MAC}密语，对成加密密钥和用在
+对称加密密钥的输入向量。按顺序排序，依次是客户端写\bfs{MAC}密语，服务器写
+\bfs{MAC}密语，客户端写密钥，服务器写密钥，客户端写输入向量，服务器写输入
+向量。不需要的值被忽略。主密语和密钥块使用\bfs{PRF}计算如下：
+
+\begin{align*}
+        X(secret,label) = &PRF(secret,label \oplus client\_random \oplus
+        sever\_random)\\
+        master\_secret  = & X(pre\_master\_secret,"master secret") \\
+            key\_block  = & X(master\_secret,"key block") {}
+\end{align*}
+
+\begin{picture}(18,2)
+        \put(0,0){\line(0,1){1.5}}
+        \put(0,0){\line(1,0){15}}
+        \put(0,1.5){\line(1,0){15}}
+        \put(15,0){\line(0,1){1.5}}
+
+        \put(2.5,0){\line(0,1){1.5}}
+        \put(5,0){\line(0,1){1.5}}
+        \put(7.5,0){\line(0,1){1.5}}
+        \put(10,0){\line(0,1){1.5}}
+        \put(12.5,0){\line(0,1){1.5}}
+        
+        \put(0.1,1){客户端写}
+        \put(0.1,0.5){MAC密语}
+        \put(2.6,1){服务器写}
+        \put(2.6,0.5){密语}
+        \put(5.1,1){客户端写密钥}
+        \put(7.6,1){服务器写密钥}
+        \put(10.1,1){客户端写IV}
+        \put(12.6,1){服务器写IV}
+
+
+\end{picture}
+
+对于出口密码族，为了服从美国出口限制，输入向量不是继承自主密钥，因为它不是私密的，
+并且按照出口限制要求，加密密钥从40比特扩展。扩展密钥而不是使用本身，是为了
+让客户端和服务器随机的，防止攻击这从40比特密钥空间里查到。\\
+
+计算方法如下，尽管必须指出美国出口限制并没有放松，因此出口密码族不应该被任何
+人真正使用。
+
+\begin{align*}
+        final\_client\_write\_key = & X(client\_write\_key,"client write key") \\
+        final\_server\_write\_key = & X(server\_write\_key,"server write key") \\
+                      iv\_block = & X(0,"IV block")
+\end{align*}
+
+输入向量的第一部份由客户端使用，第二部份由服务器端使用。
+
+\subsection{SSLv3}
+
+\bfs{SSLv3}主密钥和密钥块计算使用了稍微不同于\bfs{TLS}的方法。主密钥的长度是
+48字节，密钥块尽可能的长以产生所有的密钥材料。下面的密钥块计算要进可能的多
+运行，多余的数据丢弃。
+
+\begin{align*}
+        master\_secret = &MD5(pre\_master\_secret \oplus SHA1("A" \oplus {} \\
+                        &pre\_master\_secret  \oplus client\_random \oplus server\_random)) \oplus  {} \\
+                        &MD5(pre\_master\_secret \oplus SHA1("BB" \oplus\\ {}
+        &pre\_master\_secret \oplus client\_random \oplus
+        server\_random))\oplus {} \\
+        &MD5(pre\_master\_secret \oplus SHA1("CCC" \oplus \\
+        &pre\_master\_secret \oplus client\_random \oplus server\_random))
+\end{align*}
+\begin{align*}
+        key_block = &MD5(master\_secret \oplus SHA1("A" \oplus {} \\
+                        &master\_secret  \oplus client\_random \oplus server\_random)) \oplus  {} \\
+                        &MD5(master\_secret \oplus SHA1("BB" \oplus\\ {}
+        &master\_secret \oplus client\_random \oplus
+        server\_random))\oplus {} \\
+        &MD5(master\_secret \oplus SHA1("CCC" \oplus \\
+        &master\_secret \oplus client\_random \oplus server\_random))
+\end{align*}
+
+
+正像\bfs{TLS},当使用出口密码族时，输入向量必须是非私密的，非对称加密密钥从
+40比特扩展。如下所示：
+
+\begin{align*}
+        final_client_write_key = & MD5(client_write_key \oplus client_random
+        \oplus server_random) {} \\
+        final_server_key  = & MD5(server_write_key \oplus server_random \oplus
+        client_random) {} \\
+        client_write_iv = &MD5(client_random \oplus server_random) {} \\
+        server_write_iv = & MD5(server_random \oplus client_random)
+\end{align*}
+
+
+\section{握手序列}
+
+前面提到的报文协议设计到了许多握手序列。这部份将讲述最常见几个---\bfs{RSA},
+临时\bfs{RSA},Diffie-Hellman和会话恢复。其他没有涉及到的序列有客户端认证，定量Diffie-Hellman和重商谈。\\
+
+%1
+\begin{picture}(15,15)
+        %left
+        \put(0,0){\line(0,1){1}}
+        \put(0,0){\line(1,0){4}}
+        \put(0,1){\line(1,0){4}}
+        \put(4,0){\line(0,1){1}}
+        \put(0.5,0.5){应用程序数据}
+
+        \put(0,5){\line(0,1){1}}
+        \put(0,5){\line(1,0){4}}
+        \put(0,6){\line(1,0){4}}
+        \put(4,5){\line(0,1){1}}
+        \put(0.5,5.5){完成}
+
+        \put(0,6.1){\line(0,1){0.9}}
+        \put(0,6.1){\line(1,0){4}}
+        \put(0,7){\line(1,0){4}}
+        \put(4,6.1){\line(0,1){0.9}}
+\put(0.5,6.5){改变密码说明}
+ 
+        \put(0,7.1){\line(0,1){0.9}}
+        \put(0,7.1){\line(1,0){4}}
+        \put(0,8){\line(1,0){4}}
+        \put(4,7.1){\line(0,1){0.9}}
+        \put(0.5,7.5){客户端密钥交换}
+ 
+        \put(0,13.1){\line(0,1){0.9}}
+        \put(0,13.1){\line(1,0){4}}
+        \put(0,14){\line(1,0){4}}
+        \put(4,13.1){\line(0,1){0.9}}
+        \put(0.5,13.5){客户端hello}
+
+        \put(0.5,14.5){客户端}
+
+        %middle
+
+        \put(4.5,-0.2){\line(0,1){14.5}}
+        \put(10,-0.2){\line(0,1){14.5}}
+
+        \put(4.5,0.5){\vector(1,0){5.5}}
+
+\end{picture} 
+  
+                
+\bfs{RSA}握手序列用于一个使用非临时\bfs{RSA}进行密钥交换密码族的回话。在这
+个握手序列里，两边都计算主密语，使用服务器和客户端随机值，它们分别包含在
+服务器和客户端hello报文里。主密语计算要包含pre-主密语，它包含在客户端密钥里
+，用服务器提供的证书报文里的密钥进行加密。\\
+
+客户端和服务器在发送改变密码说明报文后都立即开始使用上顶的密钥和密码族
+加密记录。加密完成的报文包含已经发送和接受的所有握手报文的摘要，这个确认
+握手没有被第三方破坏。连接的对方独立的计算摘要并进行验证。
+
+
+%2
+\begin{picture}(15,15)
+
+\end{picture}
+
+临时握手序列在临时Diffie-Hellman和临时\bfs{RSA}作为密钥交换算法时，使用。它
+和\bfs{RSA}的不同点在于，服务器在服务器hello报文发送后，立即发送密钥交换报文。
+这个报文包含了用来加密pre-master密语(在客户端密钥交换报文里）的密钥。\\
+
+
+临时\bfs{RSA}允许用于出口密码的证书长于512比特。这是通过只使用证书验证服务器
+达到的，小于等于512比特的临时密钥用来加密客户端密钥交换报文。这是因为出口密码
+可能不使用长于512比特的\bfs{RSA}密钥加密。但是这个长度的证书很容易受到攻击。\\
+
+临时Diffie-Hellman定义上使用不包含在证书里的临时密钥，并且是在服务器交换报文
+里发送。\\
+
+\begin{picture}(15,15)
+
+\end{picture}
+
+
+简化握手序列用在会话回复的情况下。这通常发生在如果端点短时间间隔重新连接服务器
+，比如同一个购物网站访问多个不同的页面。在客户端hello报文里，客户端通过
+之前服务器给定的会话id标识自己，服务器在服务器hello报文里返回这个会话id，
+就隐式表明服务器同意使用简化握手。之前连接的主密语被双方缓存，并在服务器和
+客户端随机值中使用，在服务器hello报文中发送，在客户端hello报文中发送。
+简化握手跳过了服务器解密客户端密钥交换报文获得pre-master密语。这个揭秘通常是
+握手中最慢的部分，除非有硬件加速。也跳过了使用\bfs{PRF}计算主密语的过程，
+所以总体上少处理了很多报文，这样握手只需花费1.5个往返时延，而不是2个。
+所有这些是的简化握手在大多数情况大速度非常快，对于\bfs{SSL/TLS}服务器的性能也是非常重要的。
+
+
+
+
+
+\pagebreak
+\appendix
+\section{警告值}
+
+这个附录详细的定义了警告严重性和描述信息，这写都在\bfs{TLSv1}说明中有
+定义。\\
+
+\subsection{警告严重性}
+\begin{center}
+\begin{tabular}{|l|r|}
+        \hline
+        严重性&数值\\
+        \hline
+           警告&1\\
+           严重&2\\
+        \hline
+\end{tabular}
+\end{center}
+
+\subsection{警告描述}
+
+\begin{center}
+\begin{tabular}{|l|r|}
+        \hline 
+        描述& 数值 \\
+        \hline
+        关闭通知&0 \\
+     非预期报文& 10 \\
+ 损坏的记录mac & 20\\
+        解密失败& 21 \\
+        记录溢出& 22 \\
+     解压缩失败& 30 \\
+        握手失败& 40 \\
+        证书损坏& 42\\
+     不支持证书& 43 \\
+     证书重激活& 44\\
+        证书过期& 45 \\
+     证书不明确&46\\
+        非法参数& 47\\
+     证书不明确& 48\\
+        禁止访问& 49\\
+        解码失败& 50\\
+        解密失败& 51\\
+        出口限制& 60\\
+        协议版本& 70\\
+     不充分安全& 71\\
+        内部错误& 80\\
+        用户取消& 90\\
+     不再重商谈& 100\\
+        \hline
+
+\end{tabular}
+
+\end{center}
+
+
 
 
 
@@ -767,3 +1167,4 @@ pad1))$$
 %        stepnumber=2]{/home/wolf/public/notes/blogs/code/etip/simplec.c} 
 %
 \end{document}
+
