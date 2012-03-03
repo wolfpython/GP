@@ -6,7 +6,10 @@
 \usepackage{color}
 \usepackage[BoldFont,SlantFont,CJKchecksingle]{xeCJK}
 %载入粗体，斜体，禁止单个汉字一行
+%align env
 \usepackage{amsmath}
+\usepackage[dvips]{graphicx}
+%\DeclareGraphicsRule{*}{eps}{*}{}
 
 %\setCJKmainfont{AR PL KaitiM GB}
 \setCJKmainfont{AR PL SungtiL GB} %缺省汉字字体为简体
@@ -33,7 +36,12 @@
         \\
 \texttt{horms@valinux.co.jp}\\
 \texttt{horms@verge.net.au}\\
-\texttt{horms@debian.org}}
+\texttt{horms@debian.org}\\
+\\
+\textbf{翻译: Walter Liu}\\
+}
+
+\vspace{6cm}
 
 \date{}
 %
@@ -979,48 +987,51 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 临时\bfs{RSA},Diffie-Hellman和会话恢复。其他没有涉及到的序列有客户端认证，定量Diffie-Hellman和重商谈。\\
 
 %1
-\begin{picture}(15,15)
-        %left
-        \put(0,0){\line(0,1){1}}
-        \put(0,0){\line(1,0){4}}
-        \put(0,1){\line(1,0){4}}
-        \put(4,0){\line(0,1){1}}
-        \put(0.5,0.5){应用程序数据}
+%%\begin{picture}(15,15)
+%        %left
+%        \put(0,0){\line(0,1){1}}
+%        \put(0,0){\line(1,0){4}}
+%        \put(0,1){\line(1,0){4}}
+%        \put(4,0){\line(0,1){1}}
+%        \put(0.5,0.5){应用程序数据}
+%
+%        \put(0,5){\line(0,1){1}}
+%        \put(0,5){\line(1,0){4}}
+%        \put(0,6){\line(1,0){4}}
+%        \put(4,5){\line(0,1){1}}
+%        \put(0.5,5.5){完成}
+%
+%        \put(0,6.1){\line(0,1){0.9}}
+%        \put(0,6.1){\line(1,0){4}}
+%        \put(0,7){\line(1,0){4}}
+%        \put(4,6.1){\line(0,1){0.9}}
+%\put(0.5,6.5){改变密码说明}
+% 
+%        \put(0,7.1){\line(0,1){0.9}}
+%        \put(0,7.1){\line(1,0){4}}
+%        \put(0,8){\line(1,0){4}}
+%        \put(4,7.1){\line(0,1){0.9}}
+%        \put(0.5,7.5){客户端密钥交换}
+% 
+%        \put(0,13.1){\line(0,1){0.9}}
+%        \put(0,13.1){\line(1,0){4}}
+%        \put(0,14){\line(1,0){4}}
+%        \put(4,13.1){\line(0,1){0.9}}
+%        \put(0.5,13.5){客户端hello}
+%
+%        \put(0.5,14.5){客户端}
+%
+%        %middle
+%
+%        \put(4.5,-0.2){\line(0,1){14.5}}
+%        \put(10,-0.2){\line(0,1){14.5}}
+%
+%        \put(4.5,0.5){\vector(1,0){5.5}}
+%
+%\end{picture} 
+\includegraphics{sequence.1}
+\\
 
-        \put(0,5){\line(0,1){1}}
-        \put(0,5){\line(1,0){4}}
-        \put(0,6){\line(1,0){4}}
-        \put(4,5){\line(0,1){1}}
-        \put(0.5,5.5){完成}
-
-        \put(0,6.1){\line(0,1){0.9}}
-        \put(0,6.1){\line(1,0){4}}
-        \put(0,7){\line(1,0){4}}
-        \put(4,6.1){\line(0,1){0.9}}
-\put(0.5,6.5){改变密码说明}
- 
-        \put(0,7.1){\line(0,1){0.9}}
-        \put(0,7.1){\line(1,0){4}}
-        \put(0,8){\line(1,0){4}}
-        \put(4,7.1){\line(0,1){0.9}}
-        \put(0.5,7.5){客户端密钥交换}
- 
-        \put(0,13.1){\line(0,1){0.9}}
-        \put(0,13.1){\line(1,0){4}}
-        \put(0,14){\line(1,0){4}}
-        \put(4,13.1){\line(0,1){0.9}}
-        \put(0.5,13.5){客户端hello}
-
-        \put(0.5,14.5){客户端}
-
-        %middle
-
-        \put(4.5,-0.2){\line(0,1){14.5}}
-        \put(10,-0.2){\line(0,1){14.5}}
-
-        \put(4.5,0.5){\vector(1,0){5.5}}
-
-\end{picture} 
   
                 
 \bfs{RSA}握手序列用于一个使用非临时\bfs{RSA}进行密钥交换密码族的回话。在这
@@ -1034,9 +1045,9 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 
 
 %2
-\begin{picture}(15,15)
+\includegraphics{sequence1.1}
+\\
 
-\end{picture}
 
 临时握手序列在临时Diffie-Hellman和临时\bfs{RSA}作为密钥交换算法时，使用。它
 和\bfs{RSA}的不同点在于，服务器在服务器hello报文发送后，立即发送密钥交换报文。
@@ -1050,10 +1061,8 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 临时Diffie-Hellman定义上使用不包含在证书里的临时密钥，并且是在服务器交换报文
 里发送。\\
 
-\begin{picture}(15,15)
-
-\end{picture}
-
+\includegraphics{sequence2.1}
+\\
 
 简化握手序列用在会话回复的情况下。这通常发生在如果端点短时间间隔重新连接服务器
 ，比如同一个购物网站访问多个不同的页面。在客户端hello报文里，客户端通过
