@@ -19,7 +19,7 @@
 %\setmainfont{DejaVu Sans Mono:style=Book}
 \XeTeXlinebreaklocale "zh"  %断行设置为中文格式
 \XeTeXlinebreakskip=0pt plus 1pt minus 0.1pt
-\addtolength{\textwidth}{4cm}
+\addtolength{\textwidth}{1cm}
 
 %rename abstract to 摘要
 \renewcommand{\abstractname}{摘要}
@@ -881,7 +881,7 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
                其中:
                \begin{align*}
                        \otimes:\qquad &\text{异或} \\
-                            S1:\qquad &\text{密语的前半部份（按位}）\\
+                            S1:\qquad &\text{密语的前半部份（按位)}）\\
                             S2:\qquad &\text{密语的后半部分(按位)}
                \end{align*}
 
@@ -899,8 +899,8 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 \begin{align*}
         X(secret,label) = &PRF(secret,label \oplus client\_random \oplus
         sever\_random)\\
-        master\_secret  = & X(pre\_master\_secret,"master secret") \\
-            key\_block  = & X(master\_secret,"key block") {}
+        master\_secret  = & X(pre\_master\_secret,``master secret") \\
+            key\_block  = & X(master\_secret,``key block") {}
 \end{align*}
 
 \begin{picture}(18,2)
@@ -935,9 +935,9 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 人真正使用。
 
 \begin{align*}
-        final\_client\_write\_key = & X(client\_write\_key,"client write key") \\
-        final\_server\_write\_key = & X(server\_write\_key,"server write key") \\
-                      iv\_block = & X(0,"IV block")
+        final\_client\_write\_key = & X(client\_write\_key,``client write key") \\
+        final\_server\_write\_key = & X(server\_write\_key,``server write key") \\
+                      iv\_block = & X(0,``IV block")
 \end{align*}
 
 输入向量的第一部份由客户端使用，第二部份由服务器端使用。
@@ -949,21 +949,21 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 运行，多余的数据丢弃。
 
 \begin{align*}
-        master\_secret = &MD5(pre\_master\_secret \oplus SHA1("A" \oplus {} \\
+        master\_secret = &MD5(pre\_master\_secret \oplus SHA1(``A" \oplus {} \\
                         &pre\_master\_secret  \oplus client\_random \oplus server\_random)) \oplus  {} \\
-                        &MD5(pre\_master\_secret \oplus SHA1("BB" \oplus\\ {}
+                        &MD5(pre\_master\_secret \oplus SHA1(``BB" \oplus\\ {}
         &pre\_master\_secret \oplus client\_random \oplus
         server\_random))\oplus {} \\
-        &MD5(pre\_master\_secret \oplus SHA1("CCC" \oplus \\
+        &MD5(pre\_master\_secret \oplus SHA1(``CCC" \oplus \\
         &pre\_master\_secret \oplus client\_random \oplus server\_random))
 \end{align*}
 \begin{align*}
-        key_block = &MD5(master\_secret \oplus SHA1("A" \oplus {} \\
+        key_block = &MD5(master\_secret \oplus SHA1(``A" \oplus {} \\
                         &master\_secret  \oplus client\_random \oplus server\_random)) \oplus  {} \\
-                        &MD5(master\_secret \oplus SHA1("BB" \oplus\\ {}
+                        &MD5(master\_secret \oplus SHA1(``BB" \oplus\\ {}
         &master\_secret \oplus client\_random \oplus
         server\_random))\oplus {} \\
-        &MD5(master\_secret \oplus SHA1("CCC" \oplus \\
+        &MD5(master\_secret \oplus SHA1(``CCC" \oplus \\
         &master\_secret \oplus client\_random \oplus server\_random))
 \end{align*}
 
