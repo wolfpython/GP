@@ -9,7 +9,9 @@
 %align env
 \usepackage{amsmath}
 %可能是fontspec已经载入graphicx，不需要载入,带选项会出错，并且把dvips选项移到全局。
-%\usepackage[dvips]{graphicx}
+%%更正：　由于在Funtoo上texlive-2011,中，前面的宏包并没有包含graphicx，所以会编译失败，最好的办法就是在这里载入一个不带选项的graphicx,
+
+\usepackage{graphicx}
 %\DeclareGraphicsRule{*}{eps}{*}{}
 
 %\setCJKmainfont{AR PL KaitiM GB}
