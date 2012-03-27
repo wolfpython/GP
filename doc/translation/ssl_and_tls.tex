@@ -1,14 +1,15 @@
 
 
-\documentclass[11pt]{article}
-\usepackage{fontspec,hyperref}
+\documentclass[11pt,dvips]{article}
+\usepackage{fontspec}
 \usepackage{listings}
 \usepackage{color}
 \usepackage[BoldFont,SlantFont,CJKchecksingle]{xeCJK}
 %载入粗体，斜体，禁止单个汉字一行
 %align env
 \usepackage{amsmath}
-\usepackage[dvips]{graphicx}
+%可能是fontspec已经载入graphicx，不需要载入,带选项会出错，并且把dvips选项移到全局。
+%\usepackage[dvips]{graphicx}
 %\DeclareGraphicsRule{*}{eps}{*}{}
 
 %\setCJKmainfont{AR PL KaitiM GB}
@@ -19,7 +20,7 @@
 %\setmainfont{DejaVu Sans Mono:style=Book}
 \XeTeXlinebreaklocale "zh"  %断行设置为中文格式
 \XeTeXlinebreakskip=0pt plus 1pt minus 0.1pt
-\addtolength{\textwidth}{4cm}
+\addtolength{\textwidth}{1cm}
 
 %rename abstract to 摘要
 \renewcommand{\abstractname}{摘要}
@@ -1029,10 +1030,12 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 %        \put(4.5,0.5){\vector(1,0){5.5}}
 %
 %\end{picture} 
-\includegraphics{sequence.1}
-\\
+\begin{figure}
 
-  
+\includegraphics{sequence.1}
+
+\end{figure}
+
                 
 \bfs{RSA}握手序列用于一个使用非临时\bfs{RSA}进行密钥交换密码族的回话。在这
 个握手序列里，两边都计算主密语，使用服务器和客户端随机值，它们分别包含在
@@ -1045,8 +1048,10 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 
 
 %2
+\begin{figure}
 \includegraphics{sequence1.1}
-\\
+
+\end{figure}
 
 
 临时握手序列在临时Diffie-Hellman和临时\bfs{RSA}作为密钥交换算法时，使用。它
@@ -1060,8 +1065,10 @@ PRF使用主密语作为密语，文本是标签的连接---对于服务器是\b
 
 临时Diffie-Hellman定义上使用不包含在证书里的临时密钥，并且是在服务器交换报文
 里发送。\\
+\begin{figure}
 
 \includegraphics{sequence2.1}
+\end{figure}
 \\
 
 简化握手序列用在会话回复的情况下。这通常发生在如果端点短时间间隔重新连接服务器
